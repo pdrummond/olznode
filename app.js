@@ -10,6 +10,9 @@ var express = require('express')
 var app = module.exports = express.createServer();
 
 // Configuration
+//  process.env.DATABASE_URL = "postgresql://localhost:5432/olznode";
+// export DATABASE_URL "postgresql://localhost:5432/olznode"
+
 
 app.configure(function(){
   app.set('views', __dirname + '/views');
@@ -23,7 +26,6 @@ app.configure(function(){
 
 app.configure('development', function(){
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
-  process.env.DATABASE_URL = "postgresql://localhost:5432/olznode";
 });
 
 app.configure('production', function(){
