@@ -1,0 +1,121 @@
+html,body {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
+	line-height: 1.4em;
+	background: #eeeeee;
+	color: #333333;
+	width: 520px;
+	margin: 0 auto;
+	-webkit-font-smoothing: antialiased;
+}
+
+#action-list {
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+}
+
+#action-list li {
+    padding: 18px 20px 18px 0;
+    position: relative;
+    font-size: 24px;
+    border-bottom: 1px solid #cccccc;
+}
+
+#action-list li:last-child {
+    border-bottom: none;
+}
+
+#action-list li.done label {
+    color: #777777;
+    text-decoration: line-through;
+}
+
+#action-list .destroy {
+    position: absolute;
+    right: 5px;
+    top: 20px;
+    display: none;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    background: url(destroy.png) no-repeat;
+}
+
+#action-list li:hover .destroy {
+    display: block;
+}
+
+#action-list .destroy:hover {
+    background-position: 0 -20px;
+}
+
+#action-list li.editing {
+    border-bottom: none;
+    margin-top: -1px;
+    padding: 0;
+}
+
+#action-list li.editing:last-child {
+    margin-bottom: -1px;
+}
+
+#action-list li.editing .edit {
+    display: block;
+    width: 444px;
+    padding: 13px 15px 14px 20px;
+    margin: 0;
+}
+
+#action-list li.editing .view {
+    display: none;
+}
+
+#action-list li .view label {
+    word-break: break-word;
+}
+
+#action-list li .edit {
+    display: none;
+}
+
+
+.view {
+	background: #fff;
+	padding: 5px;
+	margin-bottom: 10px;
+	-webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 6px 0;
+	-moz-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 6px 0;
+	-ms-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 6px 0;
+	-o-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 6px 0;
+	box-shadow: rgba(0, 0, 0, 0.2) 0 2px 6px 0;
+}
+
+input[type="text"],select,textarea {
+	padding: 10px;
+	width: 400px;
+	background-color: #e67e22;
+	color: #ffffff;
+	border: none;
+	font-size: 20px;
+}
+
+::-webkit-input-placeholder { /* WebKit browsers */
+	color: #f39c12;
+}
+
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+	color: #f39c12;
+}
+
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+	color: #f39c12;
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10+ */
+	color: #f39c12;
+}

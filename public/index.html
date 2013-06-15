@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>OpenLoopz</title>
+  <link rel="stylesheet" href="/css/olz.css"/>
+</head>
+
+<body>
+
+  <div id="olzapp">
+
+    <header>
+      <h1>Actions</h1>
+      <input id="new-action" type="text" placeholder="What do you need to do?">
+    </header>
+
+    <section id="main">
+      <input id="toggle-all" type="checkbox">
+      <label for="toggle-all">Mark all as complete</label>
+      <ul id="action-list"></ul>
+    </section>
+
+  </div>
+
+  <script src="/js/external/json2.js"></script>
+  <script src="/js/external/jquery.js"></script>
+  <script src="/js/external/underscore.js"></script>
+  <script src="/js/external/backbone.js"></script>
+  <script src="/js/external/backbone.localStorage.js"></script>
+  <script src="/js/olz.js"></script>
+
+  <!-- Templates -->
+
+  <script type="text/template" id="action-template">
+    <div class="view">
+      <input class="toggle" type="checkbox" <%= done ? 'checked="checked"' : '' %> />
+      <label><%- title %></label>
+      <a class="destroy"></a>
+    </div>
+    <input class="edit" type="text" value="<%- title %>" />
+  </script>
+
+  </body>
+</html>
