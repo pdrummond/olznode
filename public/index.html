@@ -12,7 +12,7 @@
   <div id="olzapp">
 
     <header>
-      <h1>Actions</h1>
+      <h1>All Actions</h1>
       <input id="new-action" type="text" placeholder="What do you need to do?">
     </header>
 
@@ -21,6 +21,11 @@
       <label for="toggle-all">Mark all as complete</label>
       <ul id="action-list"></ul>
     </section>
+
+    <footer>
+      <a id="clear-completed">Clear completed</a>
+      <div id="action-count"></div>
+    </footer>
 
   </div>
 
@@ -41,6 +46,14 @@
     </div>
     <input class="edit" type="text" value="<%- title %>" />
   </script>
+
+  <script type="text/template" id="stats-template">
+    <% if (done) { %>
+    <a id="clear-completed">Clear <%= done %> completed <%= done == 1 ? 'item' : 'items' %></a>
+    <% } %>
+    <div class="action-count"><b><%= remaining %></b> <%= remaining == 1 ? 'item' : 'items' %> left</div>
+  </script>
+  
 
   </body>
 </html>
