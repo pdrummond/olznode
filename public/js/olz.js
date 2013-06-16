@@ -1,4 +1,10 @@
+
+
+
 OlzApp = (function(Backbone, $) {
+    var config = {
+        filter: ''
+    };
 
     var Action = Backbone.Model.extend({
         defaults: function() {
@@ -49,14 +55,30 @@ OlzApp = (function(Backbone, $) {
         initialize: function() {
             this.listenTo(this.model, 'change', this.render);
             this.listenTo(this.model, 'destroy', this.remove);
+            this.listenTo(this.model, 'visible', this.toggleVisible);
         },
 
         render: function() {
             var template = this.template || (this.template = _.template($('#action-template').html())); 
             this.$el.html(this.template(this.model.toJSON()));
             this.$el.toggleClass('done', this.model.get('done'));
+            this.toggleVisible();
             this.input = this.$('.edit');
             return this;
+        },
+
+        toggleVisible: function() {
+            this.$el.toggleClass('hidden', this.isHidden());
+        },
+
+        isHidden: function() {
+	    var isCompleted = this.model.get('done');
+	    var h = 
+                (
+		    (!isCompleted && config.filter === 'completed') ||
+		        (isCompleted && config.filter === 'active')
+	        );
+            return h;
         },
 
         toggleDone: function() {
@@ -105,6 +127,8 @@ OlzApp = (function(Backbone, $) {
             
             this.listenTo(Actions, 'add', this.addOne);
             this.listenTo(Actions, 'reset', this.addAll);
+            this.listenTo(Actions, 'change:completed', this.filterOne);
+            this.listenTo(Actions, 'filter', this.filterAll);
             this.listenTo(Actions, 'all', this.render);
 
             this.footer = this.$('footer');
@@ -123,6 +147,11 @@ OlzApp = (function(Backbone, $) {
                 this.main.show();
                 this.footer.show();
                 this.footer.html(statsTemplate({done: done, remaining: remaining}));
+
+		this.$('#filters li a')
+		    .removeClass('selected')
+		    .filter('[href="#/' + (config.filter || '') + '"]')
+		    .addClass('selected');
             } else {
                 this.main.hide();
                 this.footer.hide();
@@ -139,6 +168,15 @@ OlzApp = (function(Backbone, $) {
         addAll: function() {
             Actions.each(this.addOne, this);
         },
+
+	filterOne: function (action) {
+	    action.trigger('visible');
+	},
+        
+	filterAll: function () {
+	    Actions.each(this.filterOne, this);
+	},
+
         
         createOnEnter: function(e) {
             if(e.keyCode != 13) return;
@@ -159,6 +197,25 @@ OlzApp = (function(Backbone, $) {
         }
         
     });
+
+    
+    var Router = Backbone.Router.extend({
+	routes: {
+	    '*filter': 'setFilter'
+	},
+        
+	setFilter: function (param) {
+	    // Set the current filter to be used
+	    config.filter = param || '';
+            
+	    // Trigger a collection filter event, causing hiding/unhiding
+	    // of Action view items
+	    Actions.trigger('filter');
+	}
+    });
+    
+    router = new Router();
+    Backbone.history.start();
     
     return {
         init: function() {

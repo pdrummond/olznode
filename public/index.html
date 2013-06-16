@@ -48,12 +48,21 @@
   </script>
 
   <script type="text/template" id="stats-template">
+    <span id="action-count"><strong><%= remaining %></strong> <%= remaining === 1 ? 'action' : 'actions' %> left</span>
+    <ul id="filters">
+      <li>
+        <a class="selected" href="#/">All</a>
+      </li>
+      <li>
+        <a href="#/active">Active</a>
+      </li>
+      <li>
+        <a href="#/completed">Completed</a>
+      </li>
+    </ul>
     <% if (done) { %>
-    <a id="clear-completed">Clear <%= done %> completed <%= done == 1 ? 'item' : 'items' %></a>
+    <button id="clear-completed">Clear completed (<%= done %>)</button>
     <% } %>
-    <div class="action-count"><b><%= remaining %></b> <%= remaining == 1 ? 'item' : 'items' %> left</div>
   </script>
-  
-
-  </body>
+</body>
 </html>
