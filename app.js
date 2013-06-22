@@ -1,10 +1,11 @@
 
-/**
+ /**
  * Module dependencies.
  */
 
 var express = require('express')
   , routes = require('./routes')
+  , winston = require('winston')
   , pg = require("pg")
   , uuid = require('node-uuid')
   , bcrypt = require('bcrypt')
@@ -25,7 +26,7 @@ passport.use(new BasicStrategy(
                             return done(null, false, {message: 'Invalid password'});
                         } else {
                             return done(null, result.rows[0].username);
-                        }
+						}
                     }
                 });
             }
@@ -36,7 +37,7 @@ var app = module.exports = express.createServer();
 
 // Configuration
 //  process.env.DATABASE_URL = "postgresql://localhost:5432/olznode";
-// export DATABASE_URL "postgresql://localhost:5432/olznode"
+// export DATABASE_URL=postgresql://localhost:5432/olznode
 
 function errorHandler(err, req, res, next) {
     res.send({ error: err });
@@ -76,7 +77,9 @@ app.configure('production', function(){
 app.get('/', routes.index);
 
 app.post('/register', function(req, res) {
+	winston.log('debug', '/register');
     var requestData = req.body;
+	winston.log('debug', 'username: %s', requestData.username);
     pg.connect(process.env.DATABASE_URL, function(err, client) {
         if(err) {
             handleError(res, 500, 'Error connecting to Openloopz Database', err);
@@ -97,6 +100,7 @@ app.post('/register', function(req, res) {
                                 handleError(res, 500, "Error adding user to database", err);
                             } else if(result.rowCount == 1) {
                                 res.send({userId:userId, username:requestData.username});
+								winston.log('info', 'User registered successfully: %s', requestData.username);
                             } else {
                                 handleError(res, 500, "Unexpected Error", {reason: "Incorrect row count for new user insert: " + result.rowCount});
                             }
@@ -125,7 +129,9 @@ function checkUserExists(username, client, next) {
 }
 
 function handleError(res, statusCode, msg, err) {
-    res.send(statusCode, {error: msg, reason:err?err.message:""});
+	var errMsg = err?(" : " + err.message):"";
+	winston.log('error', msg + '%s', errMsg);
+    res.send(statusCode, {error: msg, reason:errMsg});
 }
 
 function isEmpty(str) {
@@ -148,4 +154,4 @@ app.get('/api/actions',
        );
 
 app.listen(process.env.PORT || 3000)
-console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+winston.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

@@ -1,10 +1,15 @@
-
-
-
 OlzApp = (function(Backbone, $) {
-    var config = {
-        filter: ''
-    };
+    var AppModel = Backbone.Model.extend({
+        defaults: function() {
+            return {
+        		filter: '',
+        		loggedIn: false
+            };
+        },
+	});
+
+	var AppConfig = new AppModel;
+        
 
     var Action = Backbone.Model.extend({
         defaults: function() {
@@ -46,12 +51,13 @@ OlzApp = (function(Backbone, $) {
         tagName: 'li',
         
         events: {
-            'click .toggle'		: 'toggleDone',
+            'click .toggle'   : 'toggleDone',
             "dblclick .view"  : "edit",
             "click a.destroy" : "clear",
             "keypress .edit"  : "updateOnEnter",
             "blur .edit"      : "close"
         },
+
         initialize: function() {
             this.listenTo(this.model, 'change', this.render);
             this.listenTo(this.model, 'destroy', this.remove);
@@ -72,13 +78,14 @@ OlzApp = (function(Backbone, $) {
         },
 
         isHidden: function() {
-	    var isCompleted = this.model.get('done');
-	    var h = 
-                (
-		    (!isCompleted && config.filter === 'completed') ||
-		        (isCompleted && config.filter === 'active')
-	        );
-            return h;
+			var filter = AppConfig.get('filter');
+			var isCompleted = this.model.get('done');
+			var h = 
+				(
+				 (!isCompleted && filter === 'completed') ||
+				 (isCompleted && filter === 'active')
+				);
+			return h;
         },
 
         toggleDone: function() {
@@ -109,9 +116,148 @@ OlzApp = (function(Backbone, $) {
         }
     });
 
+	var SaveButtonView = Backbone.View.extend({
+		el: '#save-button',
+		events: {
+			'click': 'saveNow'
+		},
+
+		initialize: function() {
+            this.listenTo(AppConfig, 'change:loggedIn', this.render);
+			this.render();
+
+		},
+
+		render: function() {
+			if(!AppConfig.get('loggedIn')) {
+				$(this.el).html('Login to save');
+			} else {
+				$(this.el).html('Save now');
+			}
+		},
+
+		saveNow: function() {
+			if(!AppConfig.get('loggedIn')) {
+				window.appView.loginView.render();
+			} else {
+				console.log("DO SYNC HERE");
+			}
+		}
+
+	});
+
+    var LoginView = Backbone.View.extend({
+        el: '#login-modal',
+            
+        events: {
+            'click #login-button': 'login',
+			'click .register-link': 'showRegisterModal'
+        },
+
+        initialize: function() {
+            this.$emailInput = this.$('#email-input');
+            this.$passwordInput = this.$('#password-input');
+        },
+
+		render: function() {
+			$('#register-modal').modal('hide');
+			$(this.el).modal('show');
+		},
+        
+        login: function() {
+            var email = this.$emailInput.val();
+            var password = this.$passwordInput.val();
+
+			if(!email || !password) {
+				return;//FIXME: show alert msg
+			}
+
+            $.ajax({
+                type: "POST",
+                url: "/auth",
+				username: email,
+				password: password,
+                data: {username: email,
+                       password: password },
+                success: function(xhr) {
+					AppConfig.set({username: email, password: password, loggedIn: true});
+					Backbone.BasicAuth.set(email, password);
+					$('#login-modal').modal('hide');
+                },
+				fail: function(xhr) {
+					AppConfig.unset(username);
+					AppConfig.unset(password);
+					AppConfig.set(username, false);
+					Backbone.BasicAuth.set('', '');
+					switch(xhr.status) {
+						default: 
+						self.$('.alert').show().find(".alert-msg").html('<strong>Unable to login-in.</strong> Unknown error');
+						break;
+					}
+				}
+            });
+        },
+
+		showRegisterModal: function() {
+			window.appView.registerView.render();
+		}
+    });
+
+
+    var RegisterView = Backbone.View.extend({
+        el: '#register-modal',
+            
+        events: {
+            'click #register-button': 'register',
+			'click .login-link': 'showLoginModal'
+        },
+
+        initialize: function() {
+            this.$nameInput = this.$('#name-input');
+            this.$emailInput = this.$('#email-input');
+            this.$passwordInput = this.$('#password-input');
+        },
+
+		render: function() {
+			$('#login-modal').modal('hide');
+			$(this.el).modal('show');
+		},
+        
+        register: function() {
+			var self = this;
+			var name = this.$nameInput.val();
+            var email = this.$emailInput.val();
+            var password = this.$passwordInput.val();
+            if(!name || !email || !password) {
+                return;//FIXME: Display alert message
+            }
+            $.ajax({
+                type: "POST",
+                url: "/register",
+                data: {	name: name,
+						username: email,
+                       password: password },
+                success: function(xhr) {
+					$('#register-modal').modal('hide');
+                },
+				complete: function(xhr) {
+					switch(xhr.status) {
+						case 409: 
+						self.$('.alert').show().find(".alert-msg").html('<strong>Unable to sign-up.</strong> Account already exists.  <a href="#" class="login-link">Click here</a> to login');
+						break;
+					}
+				}
+            });
+        },
+
+		showLoginModal: function() {
+			window.appView.loginView.render();
+		}
+    });
+
 
     var AppView = Backbone.View.extend({
-        el: $('#olzapp'),
+        el: '#olzapp',
             
         events: {
             'keypress #new-action': 'createOnEnter',
@@ -120,10 +266,15 @@ OlzApp = (function(Backbone, $) {
         },
         
         initialize: function() {
-            this.input = this.$('#new-action');
-            this.allCheckbox = this.$('#toggle-all')[0];
+			this.saveButtonView = new SaveButtonView();
+            this.registerView = new RegisterView();
+            this.loginView = new LoginView();
             
             this.actions = Actions;
+
+            this.input = this.$('#new-action');
+            this.allCheckbox = this.$('#toggle-all')[0];
+
             
             this.listenTo(Actions, 'add', this.addOne);
             this.listenTo(Actions, 'reset', this.addAll);
@@ -148,16 +299,17 @@ OlzApp = (function(Backbone, $) {
                 this.footer.show();
                 this.footer.html(statsTemplate({done: done, remaining: remaining}));
 
-		this.$('#filters li a')
-		    .removeClass('selected')
-		    .filter('[href="#/' + (config.filter || '') + '"]')
-		    .addClass('selected');
+				var filter = AppConfig.get('filter');
+				this.$('#filters li a')
+					.removeClass('selected')
+					.filter('[href="#/' + (filter || '') + '"]')
+					.addClass('selected');
             } else {
                 this.main.hide();
                 this.footer.hide();
             }
             
-            this.allCheckbox.checked = !remaining;
+//            this.allCheckbox.checked = !remaining;
         },
         
         addOne: function(action) {
@@ -201,19 +353,20 @@ OlzApp = (function(Backbone, $) {
     
     var Router = Backbone.Router.extend({
 	routes: {
-	    '*filter': 'setFilter'
+	    '*filter': 'setFilter',
 	},
-        
+
 	setFilter: function (param) {
 	    // Set the current filter to be used
-	    config.filter = param || '';
-            
+
+	    var filter = param || '';
+		AppConfig.set('filter', filter);            
+
 	    // Trigger a collection filter event, causing hiding/unhiding
 	    // of Action view items
 	    Actions.trigger('filter');
 	}
     });
-    
     router = new Router();
     Backbone.history.start();
     

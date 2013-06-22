@@ -1,10 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<etml lang="en">
 
 <head>
   <meta charset="utf-8">
   <title>OpenLoopz</title>
   <link rel="stylesheet" href="/css/olz.css"/>
+  <link rel="stylesheet" href="/css/external/bootplus.css"/>  
+  <script src="/js/external/json2.js"></script>
+  <script src="/js/external/jquery.js"></script>
+  <script src="/js/external/underscore.js"></script>
+  <script src="/js/external/backbone.js"></script>
+  <script src="/js/external/backbone.localStorage.js"></script>
+  <script src="/js/external/backbone.basicauth.js"></script>
+  <script src="/js/external/bootstrap.js"></script>
+  <script src="/js/olz.js"></script>
+
 </head>
 
 <body>
@@ -13,6 +23,8 @@
 
     <header>
       <h1>All Actions</h1>
+       <button id="save-button"></button>
+
       <input id="new-action" type="text" placeholder="What do you need to do?">
     </header>
 
@@ -29,12 +41,6 @@
 
   </div>
 
-  <script src="/js/external/json2.js"></script>
-  <script src="/js/external/jquery.js"></script>
-  <script src="/js/external/underscore.js"></script>
-  <script src="/js/external/backbone.js"></script>
-  <script src="/js/external/backbone.localStorage.js"></script>
-  <script src="/js/olz.js"></script>
 
   <!-- Templates -->
 
@@ -64,5 +70,58 @@
     <button id="clear-completed">Clear completed (<%= done %>)</button>
     <% } %>
   </script>
+
+  <!-- Modals -->
+
+  <div id="login-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Login</h3>
+    </div>
+    <div class="modal-body">
+      <span class="help-block">If you don't have an OpenLoopz account yet then click <a href="#" class="register-link">here</a> to sign up</span>
+
+	  <div class="alert hide">
+	  <button type="button" class="close" data-dismiss="alert">&times;</button>
+		<span class="alert-msg"></span>
+		</div>
+      <form>
+        <fieldset>
+          <input id="email-input" class="" type="text" placeholder="Email"><br>
+          <input id="password-input" class="" type="password" placeholder="Password">
+        </fieldset>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+      <button id="login-button" class="btn btn-primary">Login</button>
+    </div>
+  </div>
+
+
+  <div id="register-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Sign-up!</h3>
+    </div>
+    <div class="modal-body">
+
+	<div class="alert hide">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		<span class="alert-msg"></span>
+	</div>
+      <form>
+        <fieldset>
+          <input id="name-input" class="" type="text" placeholder="Name">
+          <input id="email-input" class="" type="text" placeholder="Email">
+          <input id="password-input" class="" type="text" placeholder="Password">
+        </fieldset>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+      <button id="register-button" class="btn btn-primary">Sign-up</button>
+    </div>
+  </div>
 </body>
 </html>
