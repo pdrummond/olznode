@@ -143,7 +143,7 @@ app.get('/api/actions',
         function(req, res) {
             pg.connect(process.env.DATABASE_URL, function(err, client, done) {
                 if(err) {
-                    res.send(JSON.stringify(err));
+					handleError(res, 500, 'Error accessing database', err);
                 } else {
                     client.query('SELECT * FROM actions', function(err, result) {
                         res.send(JSON.stringify(result.rows));
@@ -152,6 +152,18 @@ app.get('/api/actions',
             });  
         }
        );
+
+app.put('/api/changes', 	
+	passport.authenticate('basic', {session: false}),
+	function(req, res) {
+		pg.connect(process.env.DATABASE_URL, function(err, client, done) {
+			if(err) {
+				handleError(res, 500, 'Error accessing database', err);
+			} else {
+
+			}
+		})
+	});
 
 app.listen(process.env.PORT || 3000)
 winston.info("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

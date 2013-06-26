@@ -25,6 +25,10 @@ OlzApp = (function(Backbone, $) {
         }
     });
 
+    var Change = Backbone.Model.extend({
+    });
+
+
     var ActionList = Backbone.Collection.extend({
         model: Action,
         localStorage: new Backbone.LocalStorage('openloopz2'),
@@ -46,6 +50,46 @@ OlzApp = (function(Backbone, $) {
     });
 
     var Actions = new ActionList;
+
+	var ChangeList = Backbone.Collection.extend({
+		model: Change,
+		url: "/api/changes",
+
+		initialize: function() {
+			this.listenTo(Actions, 'change', this.addUpdateChange);	
+		},
+
+		addUpdateChange: function(action) {
+			var self = this;
+			console.log("ACTION CHANGE: " + JSON.stringify(action.changedAttributes()));
+			for(change in action.changedAttributes()) {
+				self.add({
+				object_type: 'action',
+				change_type: 'update',
+				field: change,
+				timestamp: new Date().toISOString()
+				});
+			}
+		},
+
+		toJSON: function() {
+			return this.groupBy('object_type');
+		},
+
+		parse: function() {
+			//FIXME: this takes grouped json and merges it into one.
+		},
+
+		save: function (method, model, options) {
+			console.log("SYNC");
+ 			return Backbone.sync('update', this, options);
+  		}
+
+
+	});
+
+	var Changes = new ChangeList;
+
 
     var ActionView = Backbone.View.extend({
         tagName: 'li',
@@ -271,6 +315,7 @@ OlzApp = (function(Backbone, $) {
             this.loginView = new LoginView();
             
             this.actions = Actions;
+			this.changes = Changes;
 
             this.input = this.$('#new-action');
             this.allCheckbox = this.$('#toggle-all')[0];
